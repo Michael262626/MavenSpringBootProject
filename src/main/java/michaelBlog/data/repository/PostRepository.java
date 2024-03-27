@@ -1,4 +1,4 @@
-package michaelBlog.repository;
+package michaelBlog.data.repository;
 
 import michaelBlog.data.model.Post;
 import org.springframework.data.mongodb.repository.MongoRepository;

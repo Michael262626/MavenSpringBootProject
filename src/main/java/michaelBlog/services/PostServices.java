@@ -1,4 +1,4 @@
-package services;
+package michaelBlog.services;
 
 import michaelBlog.data.model.Post;
 import michaelBlog.dtos.request.CreatePostRequest;
