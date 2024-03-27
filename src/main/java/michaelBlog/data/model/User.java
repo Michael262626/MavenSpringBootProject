@@ -1,7 +1,9 @@
 package michaelBlog.data.model;
 
 import lombok.Data;
+import michaelBlog.data.model.Post;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
@@ -14,5 +16,6 @@ public class User {
     @Id
     private String id;
     private String userName;
+    @DBRef
     private List<Post> postList;
 }
