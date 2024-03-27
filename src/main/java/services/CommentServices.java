@@ -1,4 +1,5 @@
 package services;
 
-public class CommentServices {
+public interface CommentServices {
+    void Comment(String content);
 }
