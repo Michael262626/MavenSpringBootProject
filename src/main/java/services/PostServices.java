@@ -14,4 +14,5 @@ public interface PostServices {
     void deletePost(DeleteRequest deleteRequest);
     Post retrievePost(RetrievePost retrieveRequest);
     List<Post> getPost(String title);
+    long numberOfPost();
 }
