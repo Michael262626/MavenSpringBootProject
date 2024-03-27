@@ -1,6 +1,7 @@
-package services;
+package michaelBlog.services;
 
 import michaelBlog.dtos.request.*;
+
 
 public interface UserServices {
     void registerUser(RegisterRequest registerRequest);
