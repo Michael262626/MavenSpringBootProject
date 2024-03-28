@@ -1,15 +1,31 @@
-class Js {
-    function(numbers) {
-        let highest = numbers[0]
-        let smallest = numbers[0]
-        for (let count = 0; count < numbers.length; count++) {
-            if (count > highest) highest = count;
-            if (count < smallest) smallest = count;
-        }
-        return [highest - smallest]
+// class Js {
+//    function(numbers) {
+//         let leftOperand = 5
+//         let rightOperand = 6
+//         let result = 0
+//     switch (numbers){
+//         case "+" : result = leftOperand + rightOperand
+//             break;
+//         case "-":  result = leftOperand - rightOperand
+//             break;
+//         case "*":  result =  leftOperand * rightOperand
+//             break;
+//         case  "/": result = leftOperand / rightOperand
+//             break;
+//         default: result = NaN;}
+// return(result)}}
+// js = new Js()
+// let value = "*"
+// console.log(js.function(value))
+function higherOrderFunction(func){
+    console.log("higher function")
+    func();
+}
+ higherOrderFunction(()=>{console.log("lower function")});
+// higherOrderFunction(lowerOfFunction);
+function greetings(greets) {
+    return function person(name) {
+        return `Hello, ${name}.${greets}`;
     }
 }
-js = new Js()
-let value = [2, 4, 5, 7, 8]
-console.log(js.function(value))
-console.log(typeof null)
+console.log(greetings("Good morning!")("mike"))
