@@ -1,43 +1,54 @@
 package michaelBlog.services;
 
+import michaelBlog.data.model.Post;
 import michaelBlog.data.model.User;
+import michaelBlog.data.repository.PostRepository;
 import michaelBlog.data.repository.UserRepository;
 import michaelBlog.dtos.request.*;
 import michaelBlog.exceptions.InvalidPasswordException;
-import michaelBlog.exceptions.NullValueException;
+import michaelBlog.exceptions.InvalidPostException;
 import michaelBlog.exceptions.UserNameExistException;
+import michaelBlog.exceptions.UsernameNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-
 import static michaelBlog.utils.Mapper.map;
+import static michaelBlog.utils.Mapper2.post;
 
 @Service
 public class UserServicesImpl implements UserServices {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PostRepository postRepository;
+    @Autowired
+    private PostServices postServices;
+
     @Override
-    public void registerUser(RegisterRequest registerRequest) {
+    public RegisterUserResponse registerUser(RegisterRequest registerRequest) {
         registerRequest.setUsername(registerRequest.getUsername().toLowerCase());
         validate(registerRequest.getUsername());
         User user = map(registerRequest);
+        RegisterUserResponse result = map(user);
         userRepository.save(user);
+        return result;
     }
+
     private void validate(String username) {
         boolean userExist = userRepository.existsByUserName(username);
-        if(userExist) throw new UserNameExistException("username already exist");
+        if (userExist) throw new UserNameExistException("username already exist");
     }
 
     @Override
     public void login(LoginRequest loginRequest) {
         User user = findById(loginRequest.getUsername());
-        if(isPasswordIncorrect(user, loginRequest.getPassword())) throw new InvalidPasswordException("Invalid password");
+        if (isPasswordIncorrect(user, loginRequest.getPassword()))
+            throw new InvalidPasswordException("Invalid password");
         user.setLocked(false);
         userRepository.save(user);
     }
+
     private boolean isPasswordIncorrect(User foundUser, String password) {
         if (foundUser == null) {
             throw new NullPointerException("Diary object is null");
@@ -48,12 +59,13 @@ public class UserServicesImpl implements UserServices {
         }
         return false;
     }
-    private User findById(String username) {
-        Optional<User> foundUser = userRepository.findById(username.toLowerCase());
-        if(foundUser.isEmpty()) throw new NullValueException("Username field cannot be empty");
 
-        return foundUser.get();
+    private User findById(String username) {
+        User foundUser = userRepository.findByUserName(username);
+        if (foundUser == null) throw new UsernameNotFoundException(String.format("%s not found", username));
+        return foundUser;
     }
+
 
     @Override
     public void logout(String username) {
@@ -75,4 +87,37 @@ public class UserServicesImpl implements UserServices {
     public long numberOfUsers() {
         return userRepository.findAll().size();
     }
+
+    @Override
+    public CreatePostResponse createPost(CreatePostRequest createPostRequest) {
+        User user = userRepository.findByUserName(createPostRequest.getUserName());
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+        Post post = new Post();
+        post.setTitle(createPostRequest.getTitle());
+        post.setContent(createPostRequest.getContent());
+        user.addPost(post);
+        postRepository.save(post);
+        CreatePostResponse response = post(post);
+        return response;
+    }
+
+    @Override
+    public long numberOfPost() {
+        return postRepository.findAll().size();
+    }
+
+    @Override
+    public DeletePostResponse deletePost(DeleteRequest deleteRequest) {
+        User author = findById(deleteRequest.getAuthor());
+        Post postToDelete = foundPost(deleteRequest.getPostId(), author);
+        return postServices.deletePostWith(deleteRequest, postToDelete);
+    }
+    private Post foundPost(String id, User author) {
+        for (Post post : author.getPosts()) if (post.getId().equals(id)) return post;
+        throw new InvalidPostException("Post with was not found");
+    }
 }
+
+
