@@ -17,6 +17,7 @@ public class Post {
     private List<Comment> comments = new ArrayList<>();
     @Id
     private String id;
+    private User user;
     @DBRef
     private List<View> views = new ArrayList<>();
     private String content;
