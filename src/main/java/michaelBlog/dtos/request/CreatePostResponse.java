@@ -3,8 +3,9 @@ package michaelBlog.dtos.request;
 import lombok.Data;
 
 @Data
-public class CreatePostRequest {
+public class CreatePostResponse {
     private String title;
     private String content;
-    private String userName;
+    private String date;
+    private String id;
 }
