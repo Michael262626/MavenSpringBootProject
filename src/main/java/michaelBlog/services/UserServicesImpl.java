@@ -5,10 +5,7 @@ import michaelBlog.data.model.User;
 import michaelBlog.data.repository.PostRepository;
 import michaelBlog.data.repository.UserRepository;
 import michaelBlog.dtos.request.*;
-import michaelBlog.exceptions.InvalidPasswordException;
-import michaelBlog.exceptions.InvalidPostException;
-import michaelBlog.exceptions.UserNameExistException;
-import michaelBlog.exceptions.UsernameNotFoundException;
+import michaelBlog.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -90,17 +87,15 @@ public class UserServicesImpl implements UserServices {
 
     @Override
     public CreatePostResponse createPost(CreatePostRequest createPostRequest) {
-        User user = userRepository.findByUserName(createPostRequest.getUserName());
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found");
-        }
-        Post post = new Post();
-        post.setTitle(createPostRequest.getTitle());
-        post.setContent(createPostRequest.getContent());
-        user.addPost(post);
-        postRepository.save(post);
-        CreatePostResponse response = post(post);
-        return response;
+        User foundUser = findById(createPostRequest.getUserName());
+        validateLogin(foundUser);
+        Post newPost = postServices.createPost(createPostRequest);
+        foundUser.getPosts().add(newPost);
+        userRepository.save(foundUser);
+        return post(newPost);
+    }
+    private void validateLogin(User user) {
+        if (!user.isLocked()) throw new IllegalUserStateException("User is not logged in");
     }
 
     @Override
@@ -116,7 +111,7 @@ public class UserServicesImpl implements UserServices {
     }
     private Post foundPost(String id, User author) {
         for (Post post : author.getPosts()) if (post.getId().equals(id)) return post;
-        throw new InvalidPostException("Post with was not found");
+        throw new InvalidPostException("Post  was not found");
     }
 }
 

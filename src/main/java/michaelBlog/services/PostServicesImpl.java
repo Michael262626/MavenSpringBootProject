@@ -1,17 +1,23 @@
 package michaelBlog.services;
 
 import michaelBlog.data.model.Post;
-import michaelBlog.dtos.request.CreatePostRequest;
-import michaelBlog.dtos.request.DeleteRequest;
-import michaelBlog.dtos.request.EditPostRequest;
-import michaelBlog.dtos.request.RetrievePost;
+import michaelBlog.data.repository.PostRepository;
+import michaelBlog.dtos.request.*;
+import michaelBlog.utils.Mapper2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static michaelBlog.utils.Mapper2.mapDeletePostResponseWith;
+@Service
 public class PostServicesImpl implements PostServices{
+    @Autowired
+    private PostRepository postRepository;
     @Override
-    public void createPost(CreatePostRequest createPostRequest) {
-
+    public Post createPost(CreatePostRequest createPostRequest) {
+        Post newPost = Mapper2.map(createPostRequest);
+        return postRepository.save(newPost);
     }
 
     @Override
@@ -20,8 +26,9 @@ public class PostServicesImpl implements PostServices{
     }
 
     @Override
-    public void deletePost(DeleteRequest deleteRequest) {
-
+        public DeletePostResponse deletePostWith(DeleteRequest deletePostRequest, Post authorPost) {
+        postRepository.delete(authorPost);
+        return mapDeletePostResponseWith(authorPost);
     }
 
     @Override
