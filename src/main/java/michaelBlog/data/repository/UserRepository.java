@@ -1,5 +1,6 @@
 package michaelBlog.data.repository;
 
+import michaelBlog.data.model.Comment;
 import michaelBlog.data.model.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;

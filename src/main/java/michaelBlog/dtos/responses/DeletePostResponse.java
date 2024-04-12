@@ -1,4 +1,4 @@
-package michaelBlog.dtos.request;
+package michaelBlog.dtos.responses;
 
 import lombok.Data;
 

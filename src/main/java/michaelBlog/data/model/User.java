@@ -11,6 +11,7 @@ import java.util.List;
 @Data
 @Document
 public class User {
+    public Comment comments;
     private String firstname;
     private String lastname;
     private String password;
@@ -21,11 +22,5 @@ public class User {
     @DBRef
     private List<Post> posts = new ArrayList<>();
 
-    public void addPost(Post post) {
-            if (posts == null) {
-                posts = new ArrayList<>();
-            }
-            posts.add(post);
-            post.setUser(this);
-    }
+
 }

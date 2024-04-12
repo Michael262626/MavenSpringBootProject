@@ -1,7 +1,11 @@
 package michaelBlog.services;
 
+import michaelBlog.data.repository.CommentRepository;
+import michaelBlog.data.repository.PostRepository;
 import michaelBlog.data.repository.UserRepository;
 import michaelBlog.dtos.request.*;
+import michaelBlog.dtos.responses.CommentResponse;
+import michaelBlog.dtos.responses.CreatePostResponse;
 import michaelBlog.exceptions.InvalidPasswordException;
 import michaelBlog.exceptions.UserNameExistException;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.assertj.core.api.FactoryBasedNavigableListAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -18,10 +21,18 @@ class UserServicesImplTest {
     @Autowired
     private UserServices userServices;
     @Autowired
+    private CommentServices commentServices;
+    @Autowired
+    private CommentRepository commentRepository;
+    @Autowired
+    private PostRepository postRepository;
+    @Autowired
     private UserRepository userRepository;
     @BeforeEach
     public void  setUp(){
         userRepository.deleteAll();
+        commentRepository.deleteAll();
+        postRepository.deleteAll();
     }
     @Test
     public void registerUser(){
@@ -122,6 +133,62 @@ class UserServicesImplTest {
         }catch (InvalidPasswordException e){
             assertEquals(e.getMessage(), "Invalid Password");
         }
+    }
+    @Test
+    public void testToLogout(){
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setFirstName("firstname");
+        registerRequest.setLastName("lastname");
+        registerRequest.setUsername("username");
+        registerRequest.setPassword("password");
+        userServices.registerUser(registerRequest);
+        assertEquals(1, userServices.numberOfUsers());
+
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername(registerRequest.getUsername());
+        loginRequest.setPassword(registerRequest.getPassword());
+        userServices.login(loginRequest);
+
+        LogoutRequest logoutRequest = new LogoutRequest();
+        logoutRequest.setUsername(loginRequest.getUsername());
+        userServices.logout(logoutRequest);
+        assertTrue(userRepository.findByUserName(logoutRequest.getUsername()).isLocked());
+    }
+    @Test
+    public void testToComment(){
+        CreateCommentRequest createCommentRequest = new CreateCommentRequest();
+        createCommentRequest.setContent("trash");
+        createCommentRequest.setAuthor("username");
+        userServices.createComment(createCommentRequest);
+        assertEquals(1, userServices.numberOfComments());
+    }
+    @Test
+    public void testToDeleteComment(){
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setFirstName("firstname");
+        registerRequest.setLastName("lastname");
+        registerRequest.setUsername("username");
+        registerRequest.setPassword("password");
+        userServices.registerUser(registerRequest);
+
+        CreatePostRequest createPostRequest = new CreatePostRequest();
+        createPostRequest.setTitle("My daily life");
+        createPostRequest.setContent("Life of a programmer");
+        createPostRequest.setUserName(registerRequest.getUsername());
+        userServices.createPost(createPostRequest);
+
+        CreateCommentRequest createCommentRequest = new CreateCommentRequest();
+        createCommentRequest.setContent("trash");
+        createCommentRequest.setAuthor("username");
+        CommentResponse createCommentResponse = userServices.createComment(createCommentRequest);
+
+        assertNotNull(createCommentResponse);
+        DeleteCommentRequest deleteCommentRequest = new DeleteCommentRequest();
+
+        deleteCommentRequest.setAuthor(createCommentRequest.getAuthor());
+        userServices.deleteComment(deleteCommentRequest);
+
+        assertEquals(0, commentServices.numberOfComments());
     }
 
 }

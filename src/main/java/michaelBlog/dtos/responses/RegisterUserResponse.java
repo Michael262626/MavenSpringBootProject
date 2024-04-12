@@ -1,8 +1,6 @@
-package michaelBlog.dtos.request;
+package michaelBlog.dtos.responses;
 
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 @Data
 public class RegisterUserResponse {

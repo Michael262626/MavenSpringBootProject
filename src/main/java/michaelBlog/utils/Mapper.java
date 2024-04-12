@@ -2,7 +2,7 @@ package michaelBlog.utils;
 
 import michaelBlog.data.model.User;
 import michaelBlog.dtos.request.RegisterRequest;
-import michaelBlog.dtos.request.RegisterUserResponse;
+import michaelBlog.dtos.responses.RegisterUserResponse;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

@@ -1,17 +1,22 @@
 package michaelBlog.services;
 
+import michaelBlog.data.model.User;
 import michaelBlog.data.model.View;
+import michaelBlog.data.repository.ViewRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-public class ViewServicesImpl implements ViewServices{
-    @Override
-    public List<View> viewers() {
-        return null;
-    }
+import static michaelBlog.utils.Mapper2.map;
 
+@Service
+public class ViewServicesImpl implements ViewServices{
+    @Autowired
+    private ViewRepository viewRepository;
     @Override
-    public long numberOfViews() {
-        return 0;
+    public View saveViewOf(User viewer) {
+        View newView = map(viewer);
+        return viewRepository.save(newView);
     }
 }

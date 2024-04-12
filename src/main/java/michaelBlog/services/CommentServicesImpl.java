@@ -1,41 +1,36 @@
 package michaelBlog.services;
 
 import michaelBlog.data.model.Comment;
-import michaelBlog.dtos.request.CreateCommentRequest;
-import michaelBlog.dtos.request.DeleteCommentRequest;
-import michaelBlog.dtos.request.EditCommentRequest;
-import michaelBlog.dtos.request.RetrieveCommentRequest;
+import michaelBlog.data.repository.CommentRepository;
+import michaelBlog.dtos.request.*;
+import michaelBlog.dtos.responses.CommentResponse;
+import michaelBlog.dtos.responses.DeleteCommentResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static michaelBlog.utils.Mapper2.*;
+
+@Service
 public class CommentServicesImpl implements CommentServices{
+    @Autowired
+    private CommentRepository commentRepository;
     @Override
-    public void createComment(CreateCommentRequest createCommentRequest) {
-
+    public CommentResponse createComment(CreateCommentRequest createCommentRequest) {
+        Comment comment = mapCommentToPost(createCommentRequest);
+        CommentResponse result = mapResponse(comment);
+        commentRepository.save(comment);
+        return result;
     }
 
     @Override
-    public void editComment(EditCommentRequest editCommentRequest) {
-
+    public DeleteCommentResponse deleteCommentResponse(DeleteCommentRequest deleteCommentRequest, Comment authorComment) {
+        commentRepository.delete(authorComment);
+        return mapToDeleteComment(authorComment);
     }
-
-    @Override
-    public void deleteComment(DeleteCommentRequest deleteCommentRequest) {
-
-    }
-
-    @Override
-    public void retrieveComment(RetrieveCommentRequest retrieveComment) {
-
-    }
-
-    @Override
-    public List<Comment> comments(String content) {
-        return null;
-    }
-
     @Override
     public long numberOfComments() {
-        return 0;
+        return commentRepository.findAll().size();
     }
 }
