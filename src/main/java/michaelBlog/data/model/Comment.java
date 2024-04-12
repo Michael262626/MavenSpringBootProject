@@ -9,6 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Comment {
     @Id
     private String id;
-    private User commenter;
+    private String commenter;
     private String comment;
 }
