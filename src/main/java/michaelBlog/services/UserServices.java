@@ -1,6 +1,7 @@
 package michaelBlog.services;
 
 import michaelBlog.data.model.Comment;
+import michaelBlog.data.model.Post;
 import michaelBlog.dtos.request.*;
 import michaelBlog.dtos.responses.*;
 
@@ -13,6 +14,7 @@ public interface UserServices {
     void logout(LogoutRequest logoutRequest);
     void deleteAccount(DeleteUserRequest deleteRequest);
     long numberOfUsers();
+    EditPostResponse editPostWith(EditPostRequest editPostRequest);
     CommentResponse createComment(CreateCommentRequest createCommentRequest);
     void deleteComment(DeleteCommentRequest deleteCommentRequest);
     CreatePostResponse createPost(CreatePostRequest createPostRequest);

@@ -9,6 +9,7 @@ import michaelBlog.data.repository.UserRepository;
 import michaelBlog.dtos.request.*;
 import michaelBlog.dtos.responses.*;
 import michaelBlog.exceptions.*;
+import michaelBlog.utils.Mapper2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -71,7 +72,13 @@ public class UserServicesImpl implements UserServices {
         if (foundUser == null) throw new UsernameNotFoundException(String.format("%s not found", username));
         return foundUser;
     }
-
+    @Override
+    public EditPostResponse editPostWith(EditPostRequest editPostRequest) {
+        User author = findById(editPostRequest.getAuthor());
+        LoginStatus(author);
+        Post authorPost = foundPost(editPostRequest.getId(), author);
+        return postServices.editPostWith(editPostRequest, authorPost);
+    }
 
     @Override
     public void logout(LogoutRequest logoutRequest) {
