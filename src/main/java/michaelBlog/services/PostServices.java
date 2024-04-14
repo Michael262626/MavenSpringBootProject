@@ -14,6 +14,7 @@ public interface PostServices {
     EditPostResponse editPostWith(EditPostRequest editPostRequest, Post authorPost);
     ViewPostResponse addViewWith(ViewPostRequest viewPostRequest, User viewer);
     DeletePostResponse deletePostWith(DeleteRequest deletePostRequest, Post authorPost);
-    List<Post> getPost(String title);
     long numberOfPost();
+
+    void deleteComment(DeleteCommentRequest deleteCommentRequest);
 }

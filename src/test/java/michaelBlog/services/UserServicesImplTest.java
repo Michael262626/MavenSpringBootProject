@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class UserServicesImplTest {
-
     @Autowired
     private UserServices userServices;
     @Autowired
@@ -92,10 +91,8 @@ class UserServicesImplTest {
         assertNotNull(createPostResponse);
 
         DeleteRequest deleteRequest = new DeleteRequest();
-        deleteRequest.setAuthor(registerRequest.getUsername());
-        var foundUser = userRepository.findByUserName(registerRequest.getUsername().toLowerCase());
-        var savedPost = foundUser.getPosts().getFirst();
-        deleteRequest.setPostId(savedPost.getId());
+        deleteRequest.setAuthor(createPostRequest.getUserName());
+        deleteRequest.setPostId(createPostResponse.getId());
         userServices.deletePost(deleteRequest);
         assertEquals(0, userServices.numberOfPost());
     }
@@ -190,5 +187,24 @@ class UserServicesImplTest {
 
         assertEquals(0, commentServices.numberOfComments());
     }
+    @Test
+    public void testToViewPost(){
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setFirstName("firstname");
+        registerRequest.setLastName("lastname");
+        registerRequest.setUsername("username");
+        registerRequest.setPassword("password");
+        userServices.registerUser(registerRequest);
+        CreatePostRequest createPostRequest = new CreatePostRequest();
+        createPostRequest.setTitle("My daily life");
+        createPostRequest.setContent("Life of a programmer");
+        createPostRequest.setUserName(registerRequest.getUsername());
+        var postId = userServices.createPost(createPostRequest);
 
+        ViewPostRequest viewPostRequest = new ViewPostRequest();
+        viewPostRequest.setPostId(postId.getId());
+        viewPostRequest.setViewer(createPostRequest.getUserName());
+        userServices.viewPost(viewPostRequest);
+        assertEquals(1, userServices.numberOfViews());
+    }
 }

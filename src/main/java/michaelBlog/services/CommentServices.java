@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface CommentServices {
     CommentResponse createComment(CreateCommentRequest createCommentRequest);
-    DeleteCommentResponse deleteCommentResponse(DeleteCommentRequest deleteCommentRequest, Comment authorComment);
+    Comment removeComment(DeleteCommentRequest deleteCommentRequest);
     long numberOfComments();
+    void delete(Comment comment);
 }

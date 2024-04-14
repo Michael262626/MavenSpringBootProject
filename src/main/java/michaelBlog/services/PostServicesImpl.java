@@ -1,5 +1,6 @@
 package michaelBlog.services;
 
+import michaelBlog.data.model.Comment;
 import michaelBlog.data.model.Post;
 import michaelBlog.data.model.User;
 import michaelBlog.data.model.View;
@@ -24,6 +25,8 @@ public class PostServicesImpl implements PostServices{
     private PostRepository postRepository;
     @Autowired
     private ViewServicesImpl viewServicesImpl;
+    @Autowired
+    private CommentServicesImpl commentServicesImpl;
 
     @Override
     public Post createPost(CreatePostRequest createPostRequest) {
@@ -57,14 +60,22 @@ public class PostServicesImpl implements PostServices{
         if (foundPost.isEmpty()) throw new PostNotFoundException("Post not found");
         return foundPost.get();
     }
-
-    @Override
-    public List<Post> getPost(String title) {
-        return null;
-    }
-
     @Override
     public long numberOfPost() {
         return postRepository.findAll().size();
+    }
+
+    @Override
+    public void deleteComment(DeleteCommentRequest deleteCommentRequest) {
+        Post post = findPostByTitleAndAuthor(deleteCommentRequest.getAuthor());
+        Comment comment = commentServicesImpl.removeComment(deleteCommentRequest);
+        post.getComments().remove(comment);
+        postRepository.save(post);
+    }
+
+    private Post findPostByTitleAndAuthor(String username) {
+        Post post = postRepository.findBy(username);
+        if (post == null) throw new PostNotFoundException("Post not found");
+        return post;
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import static org.springframework.http.HttpStatus.*;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/blog")
 public class UserController {
     @Autowired
     private UserServices userServices;
@@ -75,6 +75,26 @@ public class UserController {
         try {
             var result = userServices.deletePost(deletePostRequest);
             return new ResponseEntity<>(new ApiResponse(true, result), OK);
+        }
+        catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), BAD_REQUEST);
+        }
+    }
+    @DeleteMapping("/delete-comment")
+    public ResponseEntity<?> deleteComment(@RequestBody DeleteCommentRequest deleteCommentRequest) {
+        try {
+            userServices.deleteComment(deleteCommentRequest);
+            return new ResponseEntity<>(new ApiResponse(true, NO_CONTENT), OK);
+        }
+        catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), BAD_REQUEST);
+        }
+    }
+    @DeleteMapping("/delete-user")
+    public ResponseEntity<?> deleteAccount(@RequestBody DeleteUserRequest deleteUserRequest) {
+        try {
+            userServices.deleteAccount(deleteUserRequest);
+            return new ResponseEntity<>(new ApiResponse(true, "Account Deleted"), OK);
         }
         catch (Exception e) {
             return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), BAD_REQUEST);

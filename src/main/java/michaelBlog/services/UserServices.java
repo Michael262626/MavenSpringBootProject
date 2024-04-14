@@ -23,4 +23,6 @@ public interface UserServices {
     DeletePostResponse deletePost(DeleteRequest deleteRequestRequest);
     GetUserPostsResponse getUserPosts(GetUserPostsRequest getUserPostsRequest);
     long numberOfComments();
+
+    long numberOfViews();
 }

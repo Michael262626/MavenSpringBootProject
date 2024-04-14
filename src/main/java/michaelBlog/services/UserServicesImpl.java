@@ -3,9 +3,11 @@ package michaelBlog.services;
 import michaelBlog.data.model.Comment;
 import michaelBlog.data.model.Post;
 import michaelBlog.data.model.User;
+import michaelBlog.data.model.View;
 import michaelBlog.data.repository.CommentRepository;
 import michaelBlog.data.repository.PostRepository;
 import michaelBlog.data.repository.UserRepository;
+import michaelBlog.data.repository.ViewRepository;
 import michaelBlog.dtos.request.*;
 import michaelBlog.dtos.responses.*;
 import michaelBlog.exceptions.*;
@@ -13,6 +15,7 @@ import michaelBlog.utils.Mapper2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 import static michaelBlog.utils.Mapper.map;
@@ -31,14 +34,16 @@ public class UserServicesImpl implements UserServices {
     private PostRepository postRepository;
     @Autowired
     private PostServices postServices;
+    @Autowired
+    private ViewRepository viewRepository;
 
     @Override
     public RegisterUserResponse registerUser(RegisterRequest registerRequest) {
         registerRequest.setUsername(registerRequest.getUsername().toLowerCase());
         validate(registerRequest.getUsername());
         User user = map(registerRequest);
-        RegisterUserResponse result = map(user);
         userRepository.save(user);
+        RegisterUserResponse result = map(user);
         return result;
     }
 
@@ -76,7 +81,7 @@ public class UserServicesImpl implements UserServices {
     public EditPostResponse editPostWith(EditPostRequest editPostRequest) {
         User author = findById(editPostRequest.getAuthor());
         LoginStatus(author);
-        Post authorPost = foundPost(editPostRequest.getId(), author);
+        Post authorPost = foundPost(editPostRequest.getId());
         return postServices.editPostWith(editPostRequest, authorPost);
     }
 
@@ -101,9 +106,8 @@ public class UserServicesImpl implements UserServices {
     @Override
     public CommentResponse createComment(CreateCommentRequest createCommentRequest) {
         Comment comment = mapCommentToPost(createCommentRequest);
-        commentRepository.save(comment);
-        CommentResponse result = mapResponse(comment);
-        return result;
+        comment = commentRepository.save(comment);
+        return mapResponse(comment);
     }
 
     @Override
@@ -114,24 +118,23 @@ public class UserServicesImpl implements UserServices {
 
     @Override
     public void deleteComment(DeleteCommentRequest deleteCommentRequest) {
-        Optional<Comment> optionalComment = Optional.ofNullable(commentRepository.findCommentBy(deleteCommentRequest.getCommentId()));
-        if (optionalComment.isEmpty()) {
-            throw new CommentNotFoundException("Comment not found");
+        List<Comment> comments = commentRepository.findByCommenter(deleteCommentRequest.getAuthor());
+        if(comments.isEmpty()) {
+            throw new CommentNotFoundException("Comment not found for author: " + deleteCommentRequest.getAuthor());
+        } else {
+            Comment commentToDelete = comments.getFirst();
+            commentRepository.delete(commentToDelete);
         }
-        Comment comment = optionalComment.get();
-
-        if (!comment.getCommenter().equals(deleteCommentRequest.getAuthor())) {
-            throw new IllegalUserStateException("You are not authorized to delete this comment");
-        }
-        commentRepository.delete(comment);
     }
+
     @Override
     public CreatePostResponse createPost(CreatePostRequest createPostRequest) {
         User foundUser = findById(createPostRequest.getUserName());
         validateLogin(foundUser);
+        userRepository.save(foundUser);
         Post newPost = postServices.createPost(createPostRequest);
         foundUser.getPosts().add(newPost);
-        userRepository.save(foundUser);
+        postRepository.save(newPost);
         return post(newPost);
     }
     private void validateLogin(User user) {
@@ -145,17 +148,19 @@ public class UserServicesImpl implements UserServices {
 
     @Override
     public DeletePostResponse deletePost(DeleteRequest deleteRequest) {
-        User author = findById(deleteRequest.getAuthor());
-        Post postToDelete = foundPost(deleteRequest.getPostId(), author);
+        //User author = findById(deleteRequest.getAuthor());
+        Post postToDelete = foundPost(deleteRequest.getPostId());
         return postServices.deletePostWith(deleteRequest, postToDelete);
     }
     @Override
     public ViewPostResponse viewPost(ViewPostRequest viewPostRequest) {
         if (viewPostRequest.getViewer() == null)
-            return postServices.addViewWith(viewPostRequest, findById("name"));
+            return postServices.addViewWith(viewPostRequest, findById(null));
         User viewer = findById(viewPostRequest.getViewer());
+        Post findPost  = foundPost(viewPostRequest.getPostId());
+        View findViewer = Mapper2.map(viewer);
         LoginStatus(viewer);
-        return postServices.addViewWith(viewPostRequest, viewer);
+        return mapViewPostResponseWith(findViewer, findPost);
     }
     private void LoginStatus(User user) {
         if (!user.isLocked()) throw new IllegalUserStateException("User is not logged in");
@@ -166,8 +171,13 @@ public class UserServicesImpl implements UserServices {
         return commentRepository.findAll().size();
     }
 
-    private Post foundPost(String id, User author) {
-        for (Post post : author.getPosts()) if (post.getId().equals(id)) return post;
+    @Override
+    public long numberOfViews() {
+        return viewRepository.findAll().size();
+    }
+
+    private Post foundPost(String id) {
+        for (Post post : postRepository.findAll()) if (post.getId().equals(id)) return post;
         throw new InvalidPostException("Post  was not found");
     }
 }

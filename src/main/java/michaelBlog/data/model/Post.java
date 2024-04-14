@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 @Data
-@Document
+@Document("post")
 public class Post {
     private String title;
     private LocalDateTime localDateTime = LocalDateTime.now();
